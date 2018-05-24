@@ -1,96 +1,61 @@
 #include <cstdlib>
 #include <ctime>
-#include <vector>
 
-/*
- * Conway's Game of Life
- * ----------------------
- *
- * 1. Any live cell with fewer than two live neighbors dies, as if caused by
- * under population.
- *
- * 2. Any live cell with two or three live neighbors lives on to the next
- * generation.
- *
- * 3. Any live cell with more than three live neighbors dies, as if by
- * overpopulation.
- *
- * 4. Any dead cell with exactly three live neighbors becomes a live cell, as if
- * by reproduction.
- */
+#include "world.hpp"
 
-class World
+using std::vector;
+
+auto
+World::generateWorld() -> void
 {
-	using vvbool = std::vector<std::vector<bool>>;
+	srand(time(nullptr));
+	size_t flags = rand() % (height * length + 1);
 
-	size_t size;
-	vvbool map;
+	for (size_t h = 0; h < height; h++)
+		for (size_t l = 0; l < length; l++)
+			map[h][l] = flags & (1 << ((h + 1) * (l + 1)));
+}
 
-	/*
-	 * Method: gen
-	 * fill map array randomly
-	 */
+auto
+World::countNeighbors(size_t h, size_t l) -> int
+{
+	auto rotR = [](auto a, auto b) { return (a + 1) % b; };
+	auto rotL = [](auto a, auto b) { return (a ? a : b) - 1; };
 
-	auto
-	gen() -> void
-	{
-		srand(time(nullptr));
-		size_t flags = rand() % (size * size) + 1;
+	size_t ys[] = {rotL(h, height), h, rotR(h, height)};
+	size_t xs[] = {rotL(l, length), l, rotR(l, length)};
 
-		for (size_t i = 0; i < size; i++)
-			for (size_t j = 0; j < size; j++)
-				map[i][j] = flags & (1 << ((i + 1) * (j + 1)));
+	int ret{0};
+
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+			if (!(i == 1 && j == 1))
+				ret += map[ys[i]][xs[j]];
+
+	return ret;
+}
+
+World::World(size_t h, size_t l)
+    : height{h}, length{l}, map(height, vector<bool>(length))
+{
+	generateWorld();
+}
+
+World::World(size_t x) : World(x, x) {}
+
+auto
+World::update() -> void
+{
+	for (size_t h = 0; h < height; h++) {
+		for (size_t l = 0; l < length; l++) {
+			int count = countNeighbors(h, l);
+			map[h][l] = count == 3 || (map[h][l] && count == 2);
+		}
 	}
+}
 
-	auto
-	countNeighbors(size_t y, size_t x) -> int
-	{
-		int ret       = 0;
-		auto rotRight = [s = size](auto a) { return (a + 1) % s; };
-		auto rotLeft = [s = size](auto a) { return a ? a - 1 : s - 1; };
-
-		size_t ys[] = {rotLeft(y), y, rotRight(y)};
-		size_t xs[] = {rotLeft(x), x, rotRight(x)};
-
-		for (int i = 0; i < 3; i++)
-			for (int j = 0; j < 3; j++)
-				if (!(j == 1 && i == 1))
-					ret += map[ys[i]][xs[j]];
-
-		return ret;
-	}
-
-	auto
-	updateCell(size_t y, size_t x) -> bool
-	{
-		size_t neighbors = countNeighbors(y, x);
-
-		return (neighbors == 3 || (map[y][x] && neighbors == 2));
-	}
-
-      public:
-	World(size_t s) : size{s}, map(s, std::vector<bool>(s)) { gen(); }
-
-	/*
-	 * Method: update
-	 * update every cell
-	 */
-
-	auto
-	update() -> void
-	{
-		vvbool new_map(size, std::vector<bool>(size));
-
-		for (size_t i = 0; i < size; i++)
-			for (size_t j = 0; j < size; j++)
-				new_map[i][j] = updateCell(i, j);
-
-		map = new_map;
-	}
-
-	auto
-	getMap() -> vvbool
-	{
-		return map;
-	}
-};
+auto
+World::getMap() -> vector<vector<bool>>
+{
+	return map;
+}
