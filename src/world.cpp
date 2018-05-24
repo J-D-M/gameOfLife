@@ -9,11 +9,11 @@ auto
 World::generateWorld() -> void
 {
 	srand(time(nullptr));
-	size_t flags = rand() % (height * length + 1);
+	auto roll = []() { return rand() % 2; };
 
 	for (size_t h = 0; h < height; h++)
 		for (size_t l = 0; l < length; l++)
-			map[h][l] = flags & (1 << ((h + 1) * (l + 1)));
+			map[h][l] = roll();
 }
 
 auto

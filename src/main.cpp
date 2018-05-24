@@ -58,7 +58,7 @@ getDimensions(int argc, char **argv) -> std::pair<size_t, size_t>
 {
 	switch (argc) {
 	case 1:
-		return {20, 20};
+		return {25, 50};
 		break;
 	case 2:
 		if (isNumber(*(argv + 1))) {
@@ -95,7 +95,6 @@ printMap(vector<vector<bool>> const &m) -> void
 	borderLine();
 }
 
-
 auto
 main(int argc, char **argv) -> int
 {
@@ -106,7 +105,7 @@ main(int argc, char **argv) -> int
 	for (;;) {
 		printMap(w.getMap());
 		w.update();
-		wait(750);
+		wait(500);
 
 		for (int i = 0; i < 50; i++)
 			putchar('\n');
