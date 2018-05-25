@@ -8,7 +8,7 @@ class World
 	std::vector<std::vector<bool>> map;
 
 	auto generateWorld() -> void;
-	auto countNeighbors(size_t, size_t) -> int;
+	auto countNeighbors() -> std::vector<std::vector<int>>;
 
       public:
 	World(size_t, size_t);
