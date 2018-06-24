@@ -3,12 +3,10 @@
 
 #include "world.hpp"
 
-using std::vector;
-
 World::World(size_t h, size_t l)
-    : height{h}, length{l}, map(height, vector<bool>(length))
+    : height{h}, length{l}, map(height, std::vector<bool>(length))
 {
-	generateWorld();
+	genRand();
 }
 
 World::World(size_t x) : World(x, x) {}
@@ -18,44 +16,42 @@ World::World(size_t x) : World(x, x) {}
  */
 
 auto
-World::generateWorld() -> void
+World::genRand() -> void
 {
 	srand(time(nullptr));
-	auto roll = []() { return rand() % 2; };
+	auto roll = [] { return rand() % 2; };
 
-	for (size_t h = 0; h < height; h++)
-		for (size_t l = 0; l < length; l++)
-			map[h][l] = roll();
+	for (auto &row : map)
+		for (size_t i = 0; i < length; i++) // lol vector<bool>
+			row[i] = roll();
 }
 
 /*
- * Returns vector with the count of each cooresponding cells neighbors
+ * Counts cell's neighbors
  */
 
-auto
-World::countNeighbors() -> vector<vector<int>>
+static auto
+sumNeighbors(const std::vector<std::vector<bool>> &map, size_t y, size_t x)
+    -> int
 {
-	vector<vector<int>> ret(height, vector<int>(length));
+	int ret = 0;
 
-	auto rotL = [](size_t a, size_t b) { return (a ? a : b) - 1; };
-	auto rotR = [](size_t a, size_t b) { return (a + 1) % b; };
+	const size_t max_y{map.size()};
+	const size_t max_x{map[0].size()};
 
-	auto getCoords = [&rotL, &rotR](auto a, auto b) -> vector<size_t> {
-		return {rotL(a, b), a, rotR(a, b)};
+	auto buildVec = [](auto a, auto b) -> std::vector<size_t> {
+		return {(a ? a - 1 : b - 1), a, ((a + 1) % b)};
 	};
 
-	auto incNeighbors = [&ret](auto ys, auto xs) {
-		for (size_t i = 0; i < 3; i++)
-			for (size_t j = 0; j < 3; j++)
-				if (!(i == 1 && j == 1))
-					++ret[ys[i]][xs[j]];
-	};
+	auto ys{buildVec(y, max_y)};
+	auto xs{buildVec(x, max_x)};
 
-	for (size_t h = 0; h < height; h++)
-		for (size_t l = 0; l < length; l++)
-			if (map[h][l])
-				incNeighbors(getCoords(h, height),
-				             getCoords(l, length));
+	for (auto i : ys) {
+		for (auto j : xs) {
+			if (!(i == y && j == x))
+				ret += map[i][j];
+		}
+	}
 
 	return ret;
 }
@@ -67,16 +63,19 @@ World::countNeighbors() -> vector<vector<int>>
 auto
 World::update() -> void
 {
-	auto counts = countNeighbors();
+	auto map_cpy{map};
 
-	for (size_t h = 0; h < height; h++)
-		for (size_t l = 0; l < length; l++)
-			map[h][l] = counts[h][l] == 3 ||
-			            (map[h][l] && counts[h][l] == 2);
+	for (size_t h = 0; h < height; h++) {
+		for (size_t l = 0; l < length; l++) {
+			int count{sumNeighbors(map_cpy, h, l)};
+
+			map[h][l] = (count == 3) || (map[h][l] && count == 2);
+		}
+	}
 }
 
 auto
-World::getMap() -> vector<vector<bool>>
+World::getMap() -> std::vector<std::vector<bool>>
 {
 	return map;
 }

@@ -1,5 +1,11 @@
-CC=g++
-FLAGS=-Wall -O3
+CC     = clang++
+LFLAGS = -lSDL2
+CFLAGS = -Wall -std=c++17 -O3
+SRCDIR = ./src
+BINDIR = ./bin
+DEPS   = $(SRCDIR)/wrappers.cpp $(SRCDIR)/world.cpp
+OBJ    = $(SRCDIR)/main.cpp
+ONAME  = gameOfLife
 
-gameOfLife: ./src/main.cpp ./src/world.cpp
-	$(CC) -o ./bin/$@ $^ $(FLAGS)
+default: $(OBJ) $(DEPS)
+	$(CC) $(CFLAGS) $(LFLAGS) $^ -o $(BINDIR)/$(ONAME)
