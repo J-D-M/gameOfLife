@@ -3,6 +3,7 @@
 namespace sdl2
 {
 
+// Log error and exit with failure
 auto
 Error::error(const char *msg) -> void
 {
@@ -57,24 +58,36 @@ Renderer::Renderer(const Window &win, int index, Uint32 flags)
 
 Renderer::~Renderer() { SDL_DestroyRenderer(ren); }
 
+// Set renderer draw color
 auto
-Renderer::setDrawColor(Color c, int alpha) -> void
+Renderer::setDrawColor(Color c, Uint8 alpha) -> void
 {
 	auto [red, green, blue] = c;
 	SDL_SetRenderDrawColor(ren, red, green, blue, alpha);
 }
 
+// Fill renderer will current color
 auto
 Renderer::clear() -> void
 {
 	SDL_RenderClear(ren);
 }
 
+// Present renderer
 auto
 Renderer::present() -> void
 {
 	SDL_RenderPresent(ren);
 }
+
+/*
+ * drawGrid
+ * Draw a square grid using Lines
+ * --------------------------------------------------
+ *  corner : top left {x, y} of grid
+ *  len    : length of each side of grid
+ *  gap    : size of spaces inside grid
+ */
 
 auto
 Renderer::drawGrid(std::tuple<int, int> corner, int len, int gap) -> void
@@ -86,6 +99,14 @@ Renderer::drawGrid(std::tuple<int, int> corner, int len, int gap) -> void
 		SDL_RenderDrawLine(ren, x, y + dis, x + len, y + dis);
 	}
 }
+
+/*
+ * drawCircle
+ * draw a circle onto the renderer
+ * --------------------------------------------------
+ *  origin : coordinate {x, y} of circle's origin
+ *  radius : length of radius
+ */
 
 auto
 Renderer::drawCircle(std::tuple<int, int> origin, int radius) -> void
@@ -104,6 +125,16 @@ Renderer::drawCircle(std::tuple<int, int> origin, int radius) -> void
 	}
 }
 
+/*
+ * fillGrid
+ * draw circles inside grid if cell is alive
+ * --------------------------------------------------
+ *  corner : top left corner {x, y} of the grid
+ *  len    : length of the grids sides
+ *  gap    : size of gaps in grid
+ *  map    : bool map representing each cells state
+ */
+
 auto
 Renderer::fillGrid(std::tuple<int, int>           corner,
                    int                            len,
@@ -112,6 +143,7 @@ Renderer::fillGrid(std::tuple<int, int>           corner,
 {
 	const int radius{static_cast<int>(gap * 0.30)};
 
+	// center of first circle
 	auto [x, y]{corner};
 	x += gap / 2;
 	y += gap / 2;

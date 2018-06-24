@@ -24,9 +24,12 @@ main(int argc, char **argv) -> int
 	Renderer mainRen(mainWin, -1, Renderer::accelerated);
 	Event    event;
 
+	int len{static_cast<int>(height * 0.9)};
+
 	const int map_size{15};
-	const int len{static_cast<int>(height * 0.9)};
 	const int gap{len / map_size};
+
+	len -= len % gap; // clean up rounding errors
 
 	const tuple<int, int> corner{(width - len) / 2, (height - len) / 2};
 

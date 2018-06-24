@@ -4,6 +4,7 @@
 
 namespace sdl2
 {
+/* Color constants */
 using Color = std::tuple<Uint8, Uint8, Uint8>;
 
 namespace color
@@ -42,7 +43,7 @@ class Renderer : Error
 	Renderer(const Window &, int, Uint32);
 	~Renderer();
 
-	auto setDrawColor(Color, int) -> void;
+	auto setDrawColor(Color, Uint8) -> void;
 	auto clear() -> void;
 	auto present() -> void;
 
